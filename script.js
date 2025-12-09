@@ -352,7 +352,7 @@ function loadVisitorCount() {
   const hitFlagKey = `${VISITOR_LOCAL_KEY}-${todayKey}`;
   const hasHitToday = localStorage.getItem(hitFlagKey);
 
-  const base = 'https://api.countapi.dev/v2';
+  const base = 'https://api.countapi.dev/v1';
   const hitUrl = `${base}/hit/${VISITOR_NAMESPACE}/${VISITOR_KEY}`;
   const getUrl = `${base}/get/${VISITOR_NAMESPACE}/${VISITOR_KEY}`;
   const url = hasHitToday ? getUrl : hitUrl;
