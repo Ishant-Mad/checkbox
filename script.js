@@ -352,32 +352,24 @@ function loadVisitorCount() {
   const hitFlagKey = `${VISITOR_LOCAL_KEY}-${todayKey}`;
   const hasHitToday = localStorage.getItem(hitFlagKey);
 
-  dom.visitorPill.textContent = 'Counting visitors...';
+  const base = 'https://api.countapi.dev/v2';
+  const hitUrl = `${base}/hit/${VISITOR_NAMESPACE}/${VISITOR_KEY}`;
+  const getUrl = `${base}/get/${VISITOR_NAMESPACE}/${VISITOR_KEY}`;
+  const url = hasHitToday ? getUrl : hitUrl;
 
-  const base = 'https://api.countapi.xyz';
-  const hitUrl = `${base}/hit/${encodeURIComponent(VISITOR_NAMESPACE)}/${encodeURIComponent(VISITOR_KEY)}`;
-  const updateUrl = `${base}/update/${encodeURIComponent(VISITOR_NAMESPACE)}/${encodeURIComponent(VISITOR_KEY)}/?amount=1`;
-  const getUrl = `${base}/get/${encodeURIComponent(VISITOR_NAMESPACE)}/${encodeURIComponent(VISITOR_KEY)}`;
-
-  const urls = hasHitToday ? [getUrl] : [hitUrl, updateUrl, getUrl];
-
-  (async () => {
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, { mode: 'cors', cache: 'no-store' });
-        if (!res.ok) throw new Error('bad status');
-        const data = await res.json();
-        if (typeof data.value === 'number') {
-          dom.visitorPill.textContent = `You are visitor #${data.value}`;
-          if (!hasHitToday) localStorage.setItem(hitFlagKey, '1');
-          return;
-        }
-      } catch (err) {
-        // try next URL
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => {
+      if (typeof data.value === 'number') {
+        dom.visitorPill.textContent = `You are visitor #${data.value}`;
+        if (!hasHitToday) localStorage.setItem(hitFlagKey, '1');
+      } else {
+        dom.visitorPill.textContent = 'Visitor count unavailable';
       }
-    }
-    dom.visitorPill.textContent = 'Visitor count unavailable';
-  })();
+    })
+    .catch(() => {
+      dom.visitorPill.textContent = 'Visitor count unavailable';
+    });
 }
 
 function update() {
